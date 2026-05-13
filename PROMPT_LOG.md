@@ -40,5 +40,16 @@ issued_at, certificate_number (уникальный)
 **Результат:**Получила все 6 моделей + mixins.py + __init__.py.
 ### Промпт 3
 **Инструмент:** Claude
-**Промпт:** ""
-**Результат:**
+**Промпт:** "Ты — senior Python разработчик. Создай модуль app/auth/security.py 
+для платформы онлайн-обучения на FastAPI.
+Нужно реализовать:
+1. Хэширование пароля через passlib (bcrypt)
+2. Проверку пароля (verify_password)
+3. Создание JWT access токена через python-jose
+4. Декодирование и верификацию JWT токена
+Настройки (SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES) 
+брать из app.config через get_settings().
+Токен должен содержать: sub (email пользователя), exp (время истечения).
+Покрой код type hints и комментариями."
+**Результат:**Получила security.py с хэшированием паролей, созданием и верификацией
+JWT.
