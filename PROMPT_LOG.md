@@ -149,10 +149,51 @@ JWT.
    - POST /courses/{course_id}/lessons — создать урок (AdminUser)
    - PUT /courses/{course_id}/lessons/{id} — обновить урок (AdminUser)
    - DELETE /courses/{course_id}/lessons/{id} — удалить урок (AdminUser)
-
 Требования:
 - 404 если курс/урок не найден
 - async/await везде
 - type hints и комментарии
 - from_attributes=True в response схемах"
 **Результат:** Получила schemas (course.py, lesson.py) и роутеры (courses.py, lessons.py) + обновлённый main.py.
+### Промпт 7
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай эндпоинты для записи на курс и прохождения тестов для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модели: Course, Enrollment, Test, Lesson в app/models/
+- Dependency aliases в app/auth/dependencies.py:
+  ActiveUser, AdminUser
+- DbSession = Annotated[AsyncSession, Depends(get_db)]
+
+Нужно создать:
+1. app/schemas/enrollment.py — Pydantic v2 схемы:
+   - EnrollmentResponse: id, user_id, course_id, enrolled_at,
+     progress (float), is_completed
+
+2. app/schemas/test.py — Pydantic v2 схемы:
+   - TestCreate: score (float, 0-100)
+   - TestResponse: id, course_id, user_id, score, passed, taken_at
+
+3. app/routers/enrollments.py — роутер prefix="/enrollments":
+   - POST /enrollments/{course_id} — записаться на курс (ActiveUser)
+     * Проверить что курс существует и опубликован (404/400)
+     * Проверить что студент ещё не записан (409)
+     * Создать Enrollment
+     * Вернуть EnrollmentResponse
+   - GET /enrollments/my — мои записи (ActiveUser)
+     * Вернуть список курсов на которые записан текущий пользователь
+   - GET /enrollments/{course_id}/progress — мой прогресс по курсу (ActiveUser)
+     * Вернуть EnrollmentResponse с текущим прогрессом
+   - DELETE /enrollments/{course_id} — отписаться от курса (ActiveUser)
+
+4. app/routers/tests.py — роутер prefix="/courses/{course_id}/tests":
+   - POST /courses/{course_id}/tests — сдать тест (ActiveUser)
+     * Проверить что студент записан на курс (403 если нет)
+     * Сохранить результат теста (passed = score >= 60)
+     * Если passed=True — обновить progress в Enrollment
+       (прогресс = количество пройденных тестов / общее уроков * 100)
+     * Если progress=100 — установить is_completed=True
+     * Вернуть TestResponse
+   - GET /courses/{course_id}/tests/my — мои результаты тестов по курсу (ActiveUser)
+Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
+**Результат:** Получила schemas (enrollment.py, test.py) и роутеры (enrollments.py, tests.py) + обновлённый main.py.
