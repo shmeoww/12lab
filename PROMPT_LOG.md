@@ -287,3 +287,19 @@ JWT токен хранить в localStorage под ключом "access_token"
 - Кнопка выйти очищает localStorage и возвращает на Auth страницу
 - Адаптивная вёрстка не нужна"
 **Результат:** Получила index.html с тремя страницами (Auth, Courses, Profile),скелетон-загрузкой, toast уведомлениями и минималистичным тёмным дизайном.
+### Итого
+- Количество промптов: 10
+- Что пришлось исправлять вручную:"
+1. Убрала дублирование _utcnow в enrollment.py, test.py, certificate.py
+2. Исправила CASCADE vs RESTRICT в course.py
+3. Заменила lazy="selectin" на lazy="select" в user.py
+4. Перенесла _DUMMY_HASH на уровень модуля в auth.py
+5. Удалила неиспользуемый JSONResponse в main.py (повторялось 4 раза)
+6. Добавила pydantic[email] в requirements.txt
+7. Понизила версию bcrypt до 4.0.1 (конфликт с passlib)
+8. Убрала connect_args из async engine в database.py
+9. Добавила selectinload для certificate.user и certificate.course
+10. Добавила DbSession в database.py
+11. Исправила логин во фронтенде: form-urlencoded → JSON"
+- Время: ~360 мин
+---

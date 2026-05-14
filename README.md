@@ -3,10 +3,334 @@
 **ФИО:** Калинина Дарья Николаевна  
 **Группа:** 220032-11  
 **Вариант:** 7
-**Предметная область:** Платформа онлайн обучения  
+**Предметная область:** Платформа онлайн-обучения  
 
 ---
 
 ## Выполненные задания
-- **Задание 1, повышенная сложность** - 
+- **Задание 1, повышенная сложность** - Создание полноценного веб-приложения
+- **Задание 2, повышенная сложность** - Code review сгенерированного кода
 ---
+## 📋 Описание проекта
+
+**LearnFlow** — REST API для платформы онлайн-обучения, реализованное на FastAPI с асинхронной работой с базой данных. Система поддерживает полный цикл обучения: от регистрации пользователя до выдачи сертификата о прохождении курса.
+
+### Основные сущности
+
+| Сущность | Описание |
+|---|---|
+| `User` | Пользователь системы (студент или администратор) |
+| `Course` | Учебный курс с названием и описанием |
+| `Lesson` | Урок внутри курса (текст, видео, материалы) |
+| `Enrollment` | Запись студента на курс с отслеживанием прогресса |
+| `Test` | Тест к уроку с баллами и результатами |
+| `Certificate` | Сертификат о завершении курса |
+
+---
+
+## 🛠 Стек технологий
+
+| Категория | Технология |
+|---|---|
+| **Веб-фреймворк** | [FastAPI](https://fastapi.tiangolo.com/) |
+| **ORM** | [SQLAlchemy 2.x](https://docs.sqlalchemy.org/) (async + AsyncSession) |
+| **База данных** | SQLite (через `aiosqlite`) |
+| **Миграции** | [Alembic](https://alembic.sqlalchemy.org/) |
+| **Аутентификация** | JWT (python-jose) + bcrypt |
+| **Валидация** | [Pydantic v2](https://docs.pydantic.dev/) |
+| **Контейнеризация** | [Docker](https://www.docker.com/) + Docker Compose |
+| **Тестирование** | pytest + httpx + pytest-asyncio |
+| **Фронтенд** | Vanilla JS / CSS (SPA, один HTML-файл) |
+
+---
+## 🚀 Установка и запуск
+
+### 1. Клонирование репозитория
+
+```bash
+git clone 
+cd lab_12
+```
+
+### 2. Настройка переменных окружения
+
+Скопируйте шаблон и заполните значения:
+
+```bash
+cp .env.example .env
+```
+
+Содержимое `.env.example` и пояснения:
+
+```dotenv
+# Секретный ключ для подписи JWT-токенов (любая случайная строка, мин. 32 символа)
+SECRET_KEY=your-super-secret-key-change-me
+
+# Алгоритм подписи JWT (рекомендуется HS256)
+ALGORITHM=HS256
+
+# Время жизни access-токена в минутах
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Время жизни refresh-токена в днях
+REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# URL подключения к базе данных
+# SQLite (по умолчанию):
+DATABASE_URL=sqlite+aiosqlite:///./learning.db
+# PostgreSQL (для продакшена):
+# DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/learning_db
+```
+
+### 3. Виртуальное окружение и зависимости
+
+```bash
+# Создание окружения
+python -m venv venv
+
+# Активация (Linux / macOS)
+source venv/bin/activate
+
+# Активация (Windows)
+venv\Scripts\activate
+
+# Установка зависимостей
+pip install -r requirements.txt
+```
+
+### 4. Применение миграций
+
+```bash
+> В dev-режиме таблицы создаются автоматически при запуске.
+```
+
+### 5. Запуск сервера
+
+```bash
+uvicorn app.main:app --reload
+```
+
+| Интерфейс | URL |
+|---|---|
+| 🖥 Фронтенд (SPA) | http://127.0.0.1:8000/app |
+| 📖 Swagger UI | http://127.0.0.1:8000/docs |
+| 📄 ReDoc | http://127.0.0.1:8000/redoc |
+
+### 6. Запуск через Docker
+
+```bash
+# Собрать и запустить
+docker-compose up --build
+
+# В фоне
+docker-compose up -d --build
+
+# Остановить
+docker-compose down
+```
+
+---
+
+## 📡 API Эндпоинты
+
+### 🔐 Auth — `/api/v1/auth`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `POST` | `/auth/register` | Регистрация нового пользователя | Публичный |
+| `POST` | `/auth/login` | Вход (возвращает `access_token` + `refresh_token`) | Публичный |
+| `POST` | `/auth/refresh` | Обновление токена по `refresh_token` | Публичный |
+
+---
+
+### 📚 Courses — `/api/v1/courses`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/courses/` | Получить список всех курсов | Авторизованный |
+| `GET` | `/courses/{id}` | Получить курс по ID | Авторизованный |
+| `POST` | `/courses/` | Создать новый курс | 🔴 Админ |
+| `PUT` | `/courses/{id}` | Обновить курс | 🔴 Админ |
+| `DELETE` | `/courses/{id}` | Удалить курс | 🔴 Админ |
+
+---
+
+### 📖 Lessons — `/api/v1/lessons`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/courses/{course_id}/lessons/` | Получить все уроки (фильтр по `course_id`) | Авторизованный |
+| `GET` | `/courses/{course_id}/lessons/{id}` | Получить урок по ID | Авторизованный |
+| `POST` | `/courses/{course_id}/lessons/` | Создать урок | 🔴 Админ |
+| `PUT` | `/courses/{course_id}/lessons/{id}` | Обновить урок | 🔴 Админ |
+| `DELETE` | `/courses/{course_id}/lessons/{id}` | Удалить урок | 🔴 Админ |
+
+---
+
+### 🎓 Enrollments — `/api/v1/enrollments`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/enrollments/my` | Список курсов текущего студента | 🟢 Студент |
+| `POST` | `/enrollments/{course_id}` | Записаться на курс | 🟢 Студент |
+| `DELETE` | `/enrollments/{course_id}` | Отписаться от курса | 🟢 Студент |
+
+---
+
+### ✅ Tests — `/api/v1/tests`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `POST` | `/courses/{course_id}/tests/` | Сдать тест по уроку (передать ответы, получить балл) | 🟢 Студент |
+| `GET` | `/courses/{course_id}/tests/my` | Мои результаты тестов | 🟢 Студент |
+
+---
+
+### 🏆 Certificates — `/api/v1/certificates`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/certificates/my` | Мои сертификаты | 🟢 Студент |
+| `GET` | `/certificates/{certificate_number}` | Получить сертификат по ID | Публичный |
+| `POST` | `/certificates/{course_id}` | Выдать сертификат | 🟢 Студент (сам запрашивает) |
+
+---
+
+### 📊 Analytics — `/api/v1/analytics`
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/analytics/stats` | Общая статистика платформы | 🔴 Админ |
+| `GET` | `/analytics/top-courses` | Топ-5 курсов по записям | 🔴 Админ |
+| `GET` | `/analytics/my-stats` | Личная статистика студента | 🟢 Студент |
+
+---
+
+### ⚙️ System
+
+| Метод | Путь | Описание | Доступ |
+|---|---|---|---|
+| `GET` | `/` | Информация об API (версия, статус) | Публичный |
+| `GET` | `/health` | Health-check (для Docker / мониторинга) | Публичный |
+| `GET` | `/app` | Отдаёт фронтенд SPA (`static/index.html`) | Публичный |
+
+---
+
+## 🔒 Права доступа
+
+### Студент 🟢
+
+- Просмотр списка курсов и уроков
+- Запись/отписка от курсов
+- Сдача тестов и просмотр своих результатов
+- Просмотр своих сертификатов
+- Просмотр личной статистики (`/analytics/my-stats`)
+
+### Администратор 🔴
+
+Всё то же, что студент, **плюс:**
+
+- Создание, редактирование и удаление курсов и уроков
+- Просмотр всех записей на курсы
+- Выдача сертификатов студентам
+- Доступ к общей статистике платформы (`/analytics/stats`, `/analytics/top-courses`)
+
+
+---
+
+## 🧪 Примеры запросов (curl)
+
+### Регистрация нового пользователя
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "student@example.com",
+    "password": "securepassword",
+    "full_name": "Иван Иванов"
+  }'
+```
+
+**Ответ:**
+```json
+{
+  "id": 2,
+  "email": "student@example.com",
+  "full_name": "Иван Иванов",
+  "is_admin": false,
+  "created_at": "2024-01-15T10:30:00"
+}
+```
+
+---
+
+### Вход в систему
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" -d '{"email": "...", "password": "..."}'
+```
+
+**Ответ:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+---
+
+### Использование токена в запросах
+
+```bash
+# Сохранить токен в переменную
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Получить список курсов
+curl http://127.0.0.1:8000/api/v1/courses/ \
+  -H "Authorization: Bearer $TOKEN"
+
+# Записаться на курс с ID=1
+curl -X POST http://127.0.0.1:8000/api/v1/enrollments/1 \
+  -H "Authorization: Bearer $TOKEN"
+
+# Моя статистика
+curl http://127.0.0.1:8000/api/v1/analytics/my-stats \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## 🧪 Запуск тестов
+
+```bash
+# Все тесты с подробным выводом
+pytest tests/ -v
+
+# Конкретный модуль
+pytest tests/test_auth.py -v
+
+# С покрытием
+pytest tests/ -v --cov=app --cov-report=term-missing
+
+# Только быстрые тесты (без интеграционных)
+pytest tests/ -v -m "not slow"
+```
+
+---
+## **Задание 2, повышенная сложность** — Code review сгенерированного кода.
+Это задание находится в REVIEW.md
+---
+
+## 📝 Лицензия
+
+Учебный проект. Все права принадлежат автору.
+
+---
+
+<div align="center">
+  <sub>Калинина Дарья Николаевна · Группа 220032-11 · Вариант 7</sub>
+</div>
