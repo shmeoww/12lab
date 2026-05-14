@@ -37,18 +37,16 @@ Write a code review in Markdown with these sections:
 5. **🔢 Score** — from 1 to 10 with brief explanation"""
 
 response = requests.post(
-    "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3",
+    "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {hf_token}",
         "Content-Type": "application/json",
     },
     json={
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 1000,
-            "temperature": 0.7,
-            "return_full_text": False,
-        }
+        "model": "mistralai/Mistral-7B-Instruct-v0.3",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1000,
+        "temperature": 0.7,
     },
     timeout=60,
 )
@@ -58,10 +56,7 @@ if response.status_code != 200:
     exit(1)
 
 data = response.json()
-if isinstance(data, list):
-    review_text = data[0].get("generated_text", "No response generated")
-else:
-    review_text = data.get("generated_text", "No response generated")
+review_text = data["choices"][0]["message"]["content"]
 
 # ── Публикуем комментарий в PR ──────────────────────────────────────────
 comment_body = f"""## 🤖 AI Code Review (Mistral 7B)
