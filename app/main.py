@@ -20,11 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import create_all_tables
 
-from app.routers import auth, courses, lessons, enrollments, tests, certificates
-
-# ── Импорт роутеров ───────────────────────────────────────────────────────────
-# Раскомментируй по мере добавления модулей:
-# from app.routers import users, courses, lessons, enrollments, auth
+from app.routers import auth, courses, lessons, enrollments, tests, certificates, analytics
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -84,25 +80,7 @@ def create_application() -> FastAPI:
     application.include_router(enrollments.router, prefix="/api/v1")
     application.include_router(tests.router,       prefix="/api/v1")
     application.include_router(certificates.router, prefix="/api/v1")
-    # ── Роутеры ───────────────────────────────────────────────────────────────
-    # Подключай роутеры здесь по мере реализации:
-    #
-    # application.include_router(
-    #     auth.router,
-    #     prefix="/api/v1/auth",
-    #     tags=["Auth"],
-    # )
-    # application.include_router(
-    #     users.router,
-    #     prefix="/api/v1/users",
-    #     tags=["Users"],
-    # )
-    # application.include_router(
-    #     courses.router,
-    #     prefix="/api/v1/courses",
-    #     tags=["Courses"],
-    # )
-
+    application.include_router(analytics.router, prefix="/api/v1")
     return application
 
 

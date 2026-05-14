@@ -227,3 +227,35 @@ JWT.
      * Публичный эндпоинт для верификации сертификата по номеру
 Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
 **Результат:** Получила schemas/certificate.py (2 схемы) и routers/certificates.py (3 эндпоинта) + обновлённый main.py.
+### Промпт 9
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай роутер аналитики для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модели: User, Course, Lesson, Enrollment, Test, Certificate в app/models/
+- Dependency aliases: ActiveUser, AdminUser в app/auth/dependencies.py
+- DbSession = Annotated[AsyncSession, Depends(get_db)]
+
+Нужно создать app/routers/analytics.py — роутер prefix="/analytics":
+1. GET /analytics/stats — общая статистика платформы (AdminUser)
+   Вернуть:
+   - total_users: количество пользователей
+   - total_courses: количество курсов
+   - total_enrollments: количество записей на курсы
+   - total_certificates: количество выданных сертификатов
+   - total_lessons: количество уроков
+
+2. GET /analytics/top-courses — топ-5 курсов по записям (AdminUser)
+   Вернуть список: course_id, title, enrollment_count
+   Отсортировать по убыванию enrollment_count
+
+3. GET /analytics/my-stats — личная статистика студента (ActiveUser)
+   Вернуть:
+   - enrolled_courses: количество курсов на которые записан
+   - completed_courses: количество завершённых курсов
+   - certificates_count: количество полученных сертификатов
+   - average_score: средний балл по всем тестам (None если тестов нет)
+   - total_tests_taken: количество сданных тестов
+
+Все ответы — отдельные Pydantic v2 схемы прямо в этом же файле (не нужен отдельный schemas/analytics.py). Требования: async/await, func.count/func.avg из sqlalchemy, type hints, комментарии."
+**Результат:**Получила routers/analytics.py (3 эндпоинта) и обновлённый main.py.

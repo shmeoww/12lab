@@ -88,3 +88,10 @@ async def drop_all_tables() -> None:
     """Удаляет все таблицы. Используется в тестах (setup/teardown)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+from typing import Annotated
+from fastapi import Depends
+
+# Готовый тип для использования в роутерах:
+# async def endpoint(db: DbSession): ...
+DbSession = Annotated[AsyncSession, Depends(get_db)]
