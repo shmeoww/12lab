@@ -197,3 +197,33 @@ JWT.
    - GET /courses/{course_id}/tests/my — мои результаты тестов по курсу (ActiveUser)
 Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
 **Результат:** Получила schemas (enrollment.py, test.py) и роутеры (enrollments.py, tests.py) + обновлённый main.py.
+### Промпт 8
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай эндпоинты для сертификатов для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модели: Certificate, Enrollment в app/models/
+- Certificate имеет поля: id, user_id, course_id, issued_at, certificate_number (уникальный)
+- Enrollment имеет поле is_completed (bool)
+- Dependency aliases: ActiveUser, AdminUser в app/auth/dependencies.py
+- DbSession = Annotated[AsyncSession, Depends(get_db)]
+
+Нужно создать:
+1. app/schemas/certificate.py — Pydantic v2 схемы:
+   - CertificateResponse: id, user_id, course_id, issued_at, certificate_number
+
+2. app/routers/certificates.py — роутер prefix="/certificates":
+   - POST /certificates/{course_id} — получить сертификат (ActiveUser)
+     * Проверить что студент завершил курс (is_completed=True в Enrollment)
+       иначе 400 с сообщением о текущем прогрессе
+     * Проверить что сертификат ещё не выдавался (409 если уже есть)
+     * Сгенерировать уникальный certificate_number формата:
+       CERT-{YEAR}-{UUID4 первые 8 символов верхним регистром}
+       Пример: CERT-2024-A1B2C3D4
+     * Сохранить Certificate в БД
+     * Вернуть CertificateResponse
+   - GET /certificates/my — мои сертификаты (ActiveUser)
+   - GET /certificates/{certificate_number} — проверить сертификат (без авторизации)
+     * Публичный эндпоинт для верификации сертификата по номеру
+Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
+**Результат:** Получила schemas/certificate.py (2 схемы) и routers/certificates.py (3 эндпоинта) + обновлённый main.py.
