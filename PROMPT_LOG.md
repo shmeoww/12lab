@@ -2,8 +2,7 @@
 ## Задание 1, повышенная сложность:  Создание полноценного веб-приложения.
 ### Промпт 1
 **Инструмент:** Claude
-**Промпт:** "Ты — senior Python разработчик. Создай базовую структуру FastAPI проекта 
-для платформы онлайн-обучения со следующими требованиями:
+**Промпт:** "Ты — senior Python разработчик. Создай базовую структуру FastAPI проекта для платформы онлайн-обучения со следующими требованиями:
 - База данных: SQLite через SQLAlchemy
 - Конфигурация через .env файл (python-dotenv)
 - Alembic для миграций
@@ -16,8 +15,7 @@
 **Результат:**Получила базовую структуру проекта, database.py с сессиями SQLAlchemy, main.py с CORS middleware, requirements.txt.
 ### Промпт 2
 **Инструмент:** Claude
-**Промпт:** "Ты — senior Python разработчик. Создай SQLAlchemy 2.x модели для платформы 
-онлайн-обучения. Используй асинхронный подход (async SQLAlchemy).
+**Промпт:** "Ты — senior Python разработчик. Создай SQLAlchemy 2.x модели для платформы онлайн-обучения. Используй асинхронный подход (async SQLAlchemy).
 Модели:
 1. User: id, email (уникальный), hashed_password, full_name, is_admin (bool, default False),
 is_active (bool, default True), created_at
@@ -40,8 +38,7 @@ issued_at, certificate_number (уникальный)
 **Результат:**Получила все 6 моделей + mixins.py + __init__.py.
 ### Промпт 3
 **Инструмент:** Claude
-**Промпт:** "Ты — senior Python разработчик. Создай модуль app/auth/security.py 
-для платформы онлайн-обучения на FastAPI.
+**Промпт:** "Ты — senior Python разработчик. Создай модуль app/auth/security.py для платформы онлайн-обучения на FastAPI.
 Нужно реализовать:
 1. Хэширование пароля через passlib (bcrypt)
 2. Проверку пароля (verify_password)
@@ -49,7 +46,40 @@ issued_at, certificate_number (уникальный)
 4. Декодирование и верификацию JWT токена
 Настройки (SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES) 
 брать из app.config через get_settings().
-Токен должен содержать: sub (email пользователя), exp (время истечения).
-Покрой код type hints и комментариями."
+Токен должен содержать: sub (email пользователя), exp (время истечения). Покрой код type hints и комментариями."
 **Результат:**Получила security.py с хэшированием паролей, созданием и верификацией
 JWT.
+### Промпт 4
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай эндпоинты аутентификации для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модель User в app/models/user.py с полями: 
+  id, email, hashed_password, full_name, is_admin, is_active, created_at
+- JWT утилиты в app/auth/security.py:
+  hash_password(), verify_password(), create_token_pair(), needs_rehash()
+  Исключения: TokenExpiredError, TokenInvalidError
+- get_db() dependency в app/database.py возвращает AsyncSession
+- get_settings() в app/config.py
+
+Нужно создать:
+1. app/schemas/user.py — Pydantic v2 схемы:
+   - UserCreate: email, password (min 8 символов), full_name (опционально)
+   - UserLogin: email, password
+   - UserResponse: id, email, full_name, is_admin, is_active, created_at
+   - TokenResponse: access_token, refresh_token, token_type="bearer"
+
+2. app/routers/auth.py — роутер с эндпоинтами:
+   - POST /auth/register: регистрация нового пользователя
+     * Проверить что email не занят (409 если занят)
+     * Захэшировать пароль
+     * Сохранить в БД
+     * Вернуть UserResponse
+   - POST /auth/login: вход
+     * Найти пользователя по email (401 если не найден)
+     * Проверить пароль (401 если неверный)
+     * Проверить is_active (403 если заблокирован)
+     * Вызвать needs_rehash и обновить хэш если нужно
+     * Вернуть TokenResponse с парой токенов
+Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
+**Результат:**Получила schemas/user.py (6 схем) и routers/auth.py (register, login, refresh) + обновлённый main.py с подключённым роутером.

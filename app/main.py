@@ -16,10 +16,11 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.database import create_all_tables
+
+from app.routers import auth
 
 # ── Импорт роутеров ───────────────────────────────────────────────────────────
 # Раскомментируй по мере добавления модулей:
@@ -77,6 +78,7 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
 
+    application.include_router(auth.router, prefix="/api/v1")
     # ── Роутеры ───────────────────────────────────────────────────────────────
     # Подключай роутеры здесь по мере реализации:
     #
