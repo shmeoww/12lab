@@ -114,3 +114,45 @@ JWT.
    - Используется как явная аннотация что эндпоинт требует авторизации
 Требования: OAuth2PasswordBearer для извлечения токена, async/await везде, type hints, комментарии."
 **Результат:** Получила dependencies.py с тремя dependency-функциями и type aliases CurrentUser, ActiveUser, AdminUser.
+### Промпт 6
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик.  Создай CRUD эндпоинты для курсов и уроков для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модели: Course, Lesson в app/models/
+- Dependency aliases в app/auth/dependencies.py:
+  ActiveUser, AdminUser (Annotated типы)
+- get_db() в app/database.py
+- DbSession = Annotated[AsyncSession, Depends(get_db)]
+
+Нужно создать:
+1. app/schemas/course.py — Pydantic v2 схемы:
+   - CourseCreate: title (min 3), description (опционально), is_published (default False)
+   - CourseUpdate: все поля опциональны
+   - CourseResponse: id, title, description, is_published, owner_id, created_at, updated_at
+
+2. app/schemas/lesson.py — Pydantic v2 схемы:
+   - LessonCreate: title (min 3), content (опционально), order (int >= 1)
+   - LessonUpdate: все поля опциональны
+   - LessonResponse: id, title, content, order, course_id, created_at
+
+3. app/routers/courses.py — роутер prefix="/courses":
+   - GET /courses — список опубликованных курсов (для всех)
+   - GET /courses/{id} — детали курса (для всех)
+   - POST /courses — создать курс (только AdminUser)
+   - PUT /courses/{id} — обновить курс (только AdminUser)
+   - DELETE /courses/{id} — удалить курс (только AdminUser)
+
+4. app/routers/lessons.py — роутер prefix="/courses/{course_id}/lessons":
+   - GET /courses/{course_id}/lessons — список уроков курса (ActiveUser)
+   - GET /courses/{course_id}/lessons/{id} — детали урока (ActiveUser)
+   - POST /courses/{course_id}/lessons — создать урок (AdminUser)
+   - PUT /courses/{course_id}/lessons/{id} — обновить урок (AdminUser)
+   - DELETE /courses/{course_id}/lessons/{id} — удалить урок (AdminUser)
+
+Требования:
+- 404 если курс/урок не найден
+- async/await везде
+- type hints и комментарии
+- from_attributes=True в response схемах"
+**Результат:** Получила schemas (course.py, lesson.py) и роутеры (courses.py, lessons.py) + обновлённый main.py.
