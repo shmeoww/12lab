@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Курсы — LearnFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Tokens ────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f12;
+      --surface:   #14171c;
+      --surface2:  #1c2029;
+      --border:    #252931;
+      --accent:    #e8ff47;       /* sharp lime */
+      --accent-dim:#b8cc2a;
+      --text:      #eef0f4;
+      --muted:     #6b7280;
+      --danger:    #ff5252;
+      --success:   #4ade80;
+      --radius:    10px;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --transition: 160ms ease;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Layout helpers ────────────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ─── Typography ────────────────────────────────────────────────────── */
+    h1, h2, h3 { font-family: var(--font-head); letter-spacing: -0.02em; }
+
+    /* ─── Inputs ────────────────────────────────────────────────────────── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .field input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    /* ─── Buttons ───────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      transition: opacity var(--transition), transform var(--transition);
+      user-select: none;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0f12;
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-dim); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-enroll {
+      background: var(--surface2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      font-size: 13px;
+      padding: 8px 16px;
+    }
+    .btn-enroll:hover:not(:disabled) { background: var(--accent); color: #0d0f12; }
+    .btn-enroll.enrolled {
+      background: transparent;
+      color: var(--success);
+      border-color: var(--success);
+      cursor: default;
+    }
+
+    /* ─── Toast ─────────────────────────────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      max-width: 320px;
+      animation: toast-in .22s ease forwards;
+      pointer-events: auto;
+    }
+    .toast.error   { background: #2a1515; border: 1px solid var(--danger); color: var(--danger); }
+    .toast.success { background: #0f2a1a; border: 1px solid var(--success); color: var(--success); }
+    .toast.fade-out { animation: toast-out .3s ease forwards; }
+
+    @keyframes toast-in  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes toast-out { from { opacity:1; } to { opacity:0; transform:translateY(8px); } }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PAGE 1 — AUTH
+    ══════════════════════════════════════════════════════════════════════ */
+    #page-auth {
+      min-height: 100vh;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% -10%, #e8ff4718 0%, transparent 70%),
+        var(--bg);
+    }
+    #page-auth.active { display: flex; }
+
+    .auth-card {
+      width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      animation: card-in .35s ease;
+    }
+    @keyframes card-in { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+
+    .auth-logo {
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .auth-logo span { color: var(--text); }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 4px #0006;
+    }
+
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+
+    .auth-footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PAGE 2 — COURSES
+    ══════════════════════════════════════════════════════════════════════ */
+    #page-courses { min-height: 100vh; }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar-brand {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+    }
+    .navbar-brand span { color: var(--text); }
+    .navbar-actions { display: flex; gap: 10px; }
+
+    /* Content */
+    .content { padding: 40px; max-width: 1100px; margin: 0 auto; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .section-header h2 { font-size: 24px; font-weight: 700; }
+    .section-header .count {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* Course grid */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .course-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .course-card:hover { border-color: #3a3f4a; transform: translateY(-2px); }
+
+    .course-num {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--accent);
+      opacity: .7;
+    }
+    .course-title {
+      font-family: var(--font-head);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .course-desc {
+      font-size: 14px;
+      color: var(--muted);
+      flex: 1;
+      line-height: 1.55;
+      /* Clamp to 3 lines */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, #21262f 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 42px; margin-bottom: 14px; }
+    .empty-state p { font-size: 16px; }
+
+    /* ══════════════════════════════════════════════════════════════════════
+       PAGE 3 — PROFILE
+    ══════════════════════════════════════════════════════════════════════ */
+    #page-profile { min-height: 100vh; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .stat-value {
+      font-family: var(--font-head);
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-value.neutral { color: var(--text); }
+
+    /* My enrollments */
+    .enrollment-list { display: flex; flex-direction: column; gap: 12px; }
+    .enrollment-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .enrollment-title {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .enrollment-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .badge-done { background: #0f2a1a; color: var(--success); border: 1px solid var(--success); }
+    .badge-progress { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Toast container ───────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PAGE 1 — AUTH
+══════════════════════════════════════════════════════════════════════════ -->
+<div id="page-auth" class="page">
+  <div class="auth-card">
+    <div class="auth-logo">Learn<span>Flow</span></div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="login">Вход</button>
+      <button class="tab-btn" data-tab="register">Регистрация</button>
+    </div>
+
+    <!-- Login form -->
+    <form class="auth-form active" id="form-login">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="btn-login">Войти</button>
+    </form>
+
+    <!-- Register form -->
+    <form class="auth-form" id="form-register">
+      <div class="field">
+        <label>Полное имя</label>
+        <input type="text" id="reg-name" placeholder="Иван Иванов" required />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input type="password" id="reg-password" placeholder="••••••••" required autocomplete="new-password" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="btn-register">Создать аккаунт</button>
+    </form>
+
+    <p class="auth-footer" id="auth-footer-login">Нет аккаунта? <a href="#" id="link-to-register" style="color:var(--accent);text-decoration:none;">Зарегистрироваться</a></p>
+    <p class="auth-footer" id="auth-footer-register" style="display:none;">Уже есть аккаунт? <a href="#" id="link-to-login" style="color:var(--accent);text-decoration:none;">Войти</a></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PAGE 2 — COURSES
+══════════════════════════════════════════════════════════════════════════ -->
+<div id="page-courses" class="page">
+  <nav class="navbar">
+    <div class="navbar-brand">Learn<span>Flow</span></div>
+    <div class="navbar-actions">
+      <button class="btn btn-ghost" id="btn-profile">Мой профиль</button>
+      <button class="btn btn-ghost" id="btn-logout">Выйти</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="section-header">
+      <h2>Все курсы</h2>
+      <span class="count" id="courses-count">—</span>
+    </div>
+    <div class="courses-grid" id="courses-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     PAGE 3 — PROFILE
+══════════════════════════════════════════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <nav class="navbar">
+    <div class="navbar-brand">Learn<span>Flow</span></div>
+    <div class="navbar-actions">
+      <button class="btn btn-ghost" id="btn-back-courses">← К курсам</button>
+      <button class="btn btn-ghost" id="btn-logout-profile">Выйти</button>
+    </div>
+  </nav>
+  <div class="content">
+    <div class="section-header">
+      <h2>Мой профиль</h2>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-header">
+      <h2>Мои курсы</h2>
+      <span class="count" id="enrollments-count">—</span>
+    </div>
+    <div class="enrollment-list" id="enrollment-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── Config ───────────────────────────────────────────────────────────── */
+const API = 'http://127.0.0.1:8000/api/v1';
+const TOKEN_KEY = 'access_token';
+
+/* ─── Helpers ──────────────────────────────────────────────────────────── */
+
+/** Show a toast notification. type: 'error' | 'success' */
+function toast(message, type = 'error') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('fade-out');
+    el.addEventListener('animationend', () => el.remove());
+  }, 3500);
+}
+
+/** Authenticated fetch wrapper. Returns parsed JSON or throws. */
+async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API}${path}`, { ...options, headers });
+
+  if (!res.ok) {
+    let msg = `Ошибка ${res.status}`;
+    try {
+      const body = await res.json();
+      msg = body.detail || body.message || msg;
+    } catch (_) { /* ignore */ }
+    throw new Error(msg);
+  }
+  // 204 No Content
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+/** Set button loading state */
+function setLoading(btn, loading) {
+  btn.disabled = loading;
+  btn.dataset.original = btn.dataset.original || btn.textContent;
+  btn.textContent = loading ? 'Загрузка…' : btn.dataset.original;
+}
+
+/* ─── Routing ──────────────────────────────────────────────────────────── */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+}
+
+function navigateToCourses() {
+  showPage('courses');
+  loadCourses();
+}
+
+function navigateToProfile() {
+  showPage('profile');
+  loadProfile();
+}
+
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  showPage('auth');
+  switchTab('login');
+}
+
+/* ─── Auth tabs ────────────────────────────────────────────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.toggle('active', f.id === `form-${tab}`));
+  document.getElementById('auth-footer-login').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('auth-footer-register').style.display = tab === 'register' ? '' : 'none';
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+document.getElementById('link-to-register').addEventListener('click', e => { e.preventDefault(); switchTab('register'); });
+document.getElementById('link-to-login').addEventListener('click',    e => { e.preventDefault(); switchTab('login'); });
+
+/* ─── Login ────────────────────────────────────────────────────────────── */
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-login');
+  setLoading(btn, true);
+  try {
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || `Ошибка ${res.status}`);
+    }
+
+    const data = await res.json();
+    const token = data.access_token;
+    if (!token) throw new Error('Токен не получен');
+
+    localStorage.setItem(TOKEN_KEY, token);
+    toast('Добро пожаловать!', 'success');
+    navigateToCourses();
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    setLoading(btn, false);
+  }
+});
+
+/* ─── Register ─────────────────────────────────────────────────────────── */
+document.getElementById('form-register').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-register');
+  setLoading(btn, true);
+  try {
+    const full_name = document.getElementById('reg-name').value.trim();
+    const email     = document.getElementById('reg-email').value.trim();
+    const password  = document.getElementById('reg-password').value;
+
+    await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, full_name }),
+    });
+
+    toast('Аккаунт создан! Войдите.', 'success');
+    switchTab('login');
+    document.getElementById('login-email').value = email;
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    setLoading(btn, false);
+  }
+});
+
+/* ─── Courses page ─────────────────────────────────────────────────────── */
+
+/** In-memory set of course_ids the user is enrolled in */
+const enrolledSet = new Set();
+
+function renderSkeletonCards(n = 6) {
+  const grid = document.getElementById('courses-grid');
+  grid.innerHTML = Array.from({ length: n }, () => `
+    <div class="skeleton-card">
+      <div class="skeleton" style="height:11px;width:40%"></div>
+      <div class="skeleton" style="height:18px;width:80%"></div>
+      <div class="skeleton" style="height:14px;width:100%"></div>
+      <div class="skeleton" style="height:14px;width:90%"></div>
+      <div class="skeleton" style="height:36px;width:100px;margin-top:8px;border-radius:8px"></div>
+    </div>
+  `).join('');
+}
+
+async function loadCourses() {
+  renderSkeletonCards();
+  document.getElementById('courses-count').textContent = '—';
+  try {
+    const courses = await apiFetch('/courses/');
+    renderCourses(courses);
+  } catch (err) {
+    toast(err.message);
+    document.getElementById('courses-grid').innerHTML =
+      `<div class="empty-state"><div class="icon">⚠️</div><p>Не удалось загрузить курсы</p></div>`;
+  }
+}
+
+function renderCourses(courses) {
+  const grid = document.getElementById('courses-grid');
+  document.getElementById('courses-count').textContent = courses.length;
+
+  if (!courses.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">📚</div><p>Курсов пока нет</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = courses.map((c, i) => `
+    <div class="course-card">
+      <div class="course-num">КУРС ${String(i + 1).padStart(2, '0')}</div>
+      <div class="course-title">${escHtml(c.title)}</div>
+      <div class="course-desc">${escHtml(c.description || 'Описание отсутствует')}</div>
+      <button
+        class="btn btn-enroll ${enrolledSet.has(c.id) ? 'enrolled' : ''}"
+        data-id="${c.id}"
+        ${enrolledSet.has(c.id) ? 'disabled' : ''}
+      >${enrolledSet.has(c.id) ? '✓ Записан' : 'Записаться'}</button>
+    </div>
+  `).join('');
+
+  // Delegate enroll click
+  grid.addEventListener('click', handleEnrollClick, { once: true });
+}
+
+/** Single delegated click handler for enroll buttons */
+function handleEnrollClick(e) {
+  const btn = e.target.closest('.btn-enroll');
+  if (!btn || btn.classList.contains('enrolled')) return;
+  enroll(btn);
+  // re-attach for future clicks (needed because of {once:true})
+  document.getElementById('courses-grid').addEventListener('click', handleEnrollClick, { once: true });
+}
+
+async function enroll(btn) {
+  const courseId = btn.dataset.id;
+  setLoading(btn, true);
+  try {
+    await apiFetch(`/enrollments/${courseId}`, { method: 'POST' });
+    enrolledSet.add(Number(courseId));
+    btn.textContent = '✓ Записан';
+    btn.classList.add('enrolled');
+    btn.disabled = true;
+    toast('Вы записаны на курс!', 'success');
+  } catch (err) {
+    toast(err.message);
+    setLoading(btn, false);
+  }
+}
+
+/* ─── Profile page ─────────────────────────────────────────────────────── */
+
+async function loadProfile() {
+  renderStatsLoading();
+  document.getElementById('enrollment-list').innerHTML = skeletonEnrollments(3);
+  document.getElementById('enrollments-count').textContent = '—';
+
+  // Load both in parallel
+  const [statsResult, enrollResult] = await Promise.allSettled([
+    apiFetch('/analytics/my-stats'),
+    apiFetch('/enrollments/my'),
+  ]);
+
+  if (statsResult.status === 'fulfilled') {
+    renderStats(statsResult.value);
+  } else {
+    toast(statsResult.reason.message);
+    document.getElementById('stats-grid').innerHTML =
+      `<div style="grid-column:1/-1;color:var(--muted);font-size:14px;">Не удалось загрузить статистику</div>`;
+  }
+
+  if (enrollResult.status === 'fulfilled') {
+    renderEnrollments(enrollResult.value);
+  } else {
+    toast(enrollResult.reason.message);
+    document.getElementById('enrollment-list').innerHTML =
+      `<div style="color:var(--muted);font-size:14px;padding:20px 0;">Не удалось загрузить курсы</div>`;
+  }
+}
+
+function renderStats(s) {
+  const avg = s.average_score !== null && s.average_score !== undefined
+    ? s.average_score.toFixed(1)
+    : '—';
+
+  const items = [
+    { label: 'Записан на курсов', value: s.enrolled_courses,  neutral: false },
+    { label: 'Завершено',         value: s.completed_courses, neutral: false },
+    { label: 'Сертификатов',      value: s.certificates_count,neutral: false },
+    { label: 'Тестов сдано',      value: s.total_tests_taken, neutral: true  },
+    { label: 'Средний балл',      value: avg,                 neutral: true  },
+  ];
+
+  document.getElementById('stats-grid').innerHTML = items.map(it => `
+    <div class="stat-card">
+      <div class="stat-label">${it.label}</div>
+      <div class="stat-value ${it.neutral ? 'neutral' : ''}">${it.value}</div>
+    </div>
+  `).join('');
+}
+
+function renderStatsLoading() {
+  document.getElementById('stats-grid').innerHTML = Array.from({ length: 5 }, () => `
+    <div class="stat-card">
+      <div class="skeleton" style="height:10px;width:70%;margin-bottom:10px"></div>
+      <div class="skeleton" style="height:32px;width:50%"></div>
+    </div>
+  `).join('');
+}
+
+function renderEnrollments(list) {
+  const container = document.getElementById('enrollment-list');
+  document.getElementById('enrollments-count').textContent = list.length;
+
+  if (!list.length) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:14px;padding:20px 0;">Вы ещё не записаны ни на один курс</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(e => {
+    const done = e.is_completed;
+    return `
+      <div class="enrollment-item">
+        <div>
+          <div class="enrollment-title">${escHtml(e.course?.title || e.title || `Курс #${e.course_id}`)}</div>
+          <div class="enrollment-meta">Записан: ${formatDate(e.enrolled_at || e.created_at)}</div>
+        </div>
+        <span class="badge ${done ? 'badge-done' : 'badge-progress'}">
+          ${done ? '✓ Завершён' : 'В процессе'}
+        </span>
+      </div>
+    `;
+  }).join('');
+}
+
+function skeletonEnrollments(n) {
+  return Array.from({ length: n }, () => `
+    <div class="enrollment-item">
+      <div style="flex:1">
+        <div class="skeleton" style="height:16px;width:60%;margin-bottom:8px"></div>
+        <div class="skeleton" style="height:12px;width:40%"></div>
+      </div>
+      <div class="skeleton" style="height:26px;width:80px;border-radius:20px"></div>
+    </div>
+  `).join('');
+}
+
+/* ─── Utilities ────────────────────────────────────────────────────────── */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+  } catch (_) { return iso; }
+}
+
+/* ─── Nav buttons ──────────────────────────────────────────────────────── */
+document.getElementById('btn-profile').addEventListener('click', navigateToProfile);
+document.getElementById('btn-back-courses').addEventListener('click', navigateToCourses);
+document.getElementById('btn-logout').addEventListener('click', logout);
+document.getElementById('btn-logout-profile').addEventListener('click', logout);
+
+/* ─── Bootstrap ────────────────────────────────────────────────────────── */
+(function init() {
+  if (localStorage.getItem(TOKEN_KEY)) {
+    navigateToCourses();
+  } else {
+    showPage('auth');
+  }
+})();
+</script>
+</body>
+</html>

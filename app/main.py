@@ -22,6 +22,8 @@ from app.database import create_all_tables
 
 from app.routers import auth, courses, lessons, enrollments, tests, certificates, analytics
 
+from fastapi.staticfiles import StaticFiles
+
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
@@ -81,6 +83,7 @@ def create_application() -> FastAPI:
     application.include_router(tests.router,       prefix="/api/v1")
     application.include_router(certificates.router, prefix="/api/v1")
     application.include_router(analytics.router, prefix="/api/v1")
+    application.mount("/static", StaticFiles(directory="static"), name="static")
     return application
 
 
@@ -104,3 +107,9 @@ async def health_check() -> dict[str, Any]:
         "app": settings.app_name,
         "version": settings.app_version,
     }
+
+from fastapi.responses import FileResponse
+
+@app.get("/app", tags=["System"], summary="Фронтенд")
+async def frontend():
+    return FileResponse("static/index.html")
