@@ -37,13 +37,13 @@ Write a code review in Markdown with these sections:
 5. **🔢 Score** — from 1 to 10 with brief explanation"""
 
 response = requests.post(
-    "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions",
+    "https://router.huggingface.co/novita/v3/openai/chat/completions",
     headers={
         "Authorization": f"Bearer {hf_token}",
         "Content-Type": "application/json",
     },
     json={
-        "model": "mistralai/Mistral-7B-Instruct-v0.3",
+        "model": "meta-llama/llama-3.1-8b-instruct",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 1000,
         "temperature": 0.7,
