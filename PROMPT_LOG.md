@@ -83,3 +83,34 @@ JWT.
      * Вернуть TokenResponse с парой токенов
 Требования: async/await везде, обработка ошибок через HTTPException, type hints, комментарии."
 **Результат:**Получила schemas/user.py (6 схем) и routers/auth.py (register, login, refresh) + обновлённый main.py с подключённым роутером.
+### Промпт 5
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай файл app/auth/dependencies.py для платформы онлайн-обучения на FastAPI.
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession)
+- Модель User в app/models/user.py
+- JWT утилиты в app/auth/security.py:
+  decode_token(), TokenExpiredError, TokenInvalidError
+- get_db() в app/database.py возвращает AsyncSession
+
+Нужно создать три dependency-функции:
+1. get_current_user(token, db) → User
+   - Извлекает Bearer токен из заголовка Authorization
+   - Декодирует JWT через decode_token()
+   - Находит пользователя в БД по email из токена
+   - Проверяет is_active
+   - Возвращает ORM-объект User
+   - 401 если токен невалидный/просрочен или пользователь не найден
+   - 403 если is_active=False
+
+2. get_current_admin(current_user) → User
+   - Зависит от get_current_user
+   - Проверяет is_admin=True
+   - 403 если не админ
+
+3. get_current_active_user(current_user) → User
+   - Зависит от get_current_user
+   - Просто возвращает пользователя (is_active уже проверен выше)
+   - Используется как явная аннотация что эндпоинт требует авторизации
+Требования: OAuth2PasswordBearer для извлечения токена, async/await везде, type hints, комментарии."
+**Результат:** Получила dependencies.py с тремя dependency-функциями и type aliases CurrentUser, ActiveUser, AdminUser.
