@@ -319,9 +319,7 @@ AI ревью Pull Request. При создании PR скрипт должен
 ## Задание 4: Генерация unit-тестов с высоким покрытием
 ### Промпт 1
 **Инструмент:** Claude
-**Промпт:** "Ты — senior Python разработчик. Создай conftest.py для тестирования
-FastAPI приложения платформы онлайн-обучения.
-
+**Промпт:** "Ты — senior Python разработчик. Создай conftest.py для тестирования FastAPI приложения платформы онлайн-обучения.
 Контекст проекта:
 - Асинхронный SQLAlchemy (AsyncSession) с aiosqlite
 - Base и engine в app/database.py
@@ -332,7 +330,6 @@ FastAPI приложения платформы онлайн-обучения.
   hash_password(), create_access_token()
 
 Нужно создать tests/conftest.py со следующими фикстурами:
-
 1. event_loop — переопределить scope на "session"
 
 2. engine (scope="session") — асинхронный движок
@@ -357,7 +354,38 @@ FastAPI приложения платформы онлайн-обучения.
 
 9. student_token (scope="function") — JWT токен для student_user
 
-Требования: pytest-asyncio, asyncio_mode="auto" в pytest.ini или
-pyproject.toml, все фикстуры async, type hints."
+Требования: pytest-asyncio, asyncio_mode="auto" в pytest.ini или pyproject.toml, все фикстуры async, type hints."
 **Результат:** Получила conftest.py с фикстурами: engine, tables, db_session,
 client, admin_user, student_user, admin_token, student_token.
+### Промпт 2
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай pytest тесты для эндпоинтов аутентификации платформы онлайн-обучения.
+Контекст проекта:
+- Тесты асинхронные (pytest-asyncio, asyncio_mode=auto)
+- Фикстуры из conftest.py: client (AsyncClient), admin_user, student_user,
+  admin_token, student_token, db_session (AsyncSession)
+- Эндпоинты: POST /api/v1/auth/register, POST /api/v1/auth/login,
+  POST /api/v1/auth/refresh
+- UserCreate требует: email, password (мин 8 символов, заглавная + цифра),
+  full_name (опционально)
+- login возвращает: access_token, refresh_token, token_type
+
+Создай tests/test_auth.py со следующими тестами:
+РЕГИСТРАЦИЯ:
+- test_register_success — успешная регистрация, проверить 201 и поля ответа
+- test_register_duplicate_email — повторная регистрация с тем же email → 409
+- test_register_invalid_email — невалидный email → 422
+- test_register_weak_password — пароль без заглавной/цифры → 422
+- test_register_short_password — пароль меньше 8 символов → 422
+ЛОГИН:
+- test_login_success — успешный логин, проверить наличие токенов
+- test_login_wrong_password — неверный пароль → 401
+- test_login_nonexistent_email — несуществующий email → 401
+- test_login_returns_bearer_type — token_type должен быть "bearer"
+REFRESH:
+- test_refresh_success — обновление токена по refresh_token → новая пара
+- test_refresh_invalid_token — невалидный токен → 401
+- test_refresh_with_access_token — передать access вместо refresh → 401
+
+Требования: assert на статус коды и ключевые поля ответа, комментарии к каждому тесту, type hints."
+**Результат:** Получила test_auth.py с 12 тестами — регистрация, логин, refresh.

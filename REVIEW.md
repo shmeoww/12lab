@@ -295,6 +295,18 @@ const res = await fetch(`${API}/auth/login`, {
   body: JSON.stringify({ email, password }),
 });
 ```
+### 12. Невалидный `_DUMMY_HASH` в auth.py
+
+**Что сгенерировал ИИ:**
+_DUMMY_HASH содержал выдуманную строку не являющуюся настоящим bcrypt хэшем.
+
+**В чём проблема:**
+При логине с несуществующим email passlib пытается верифицировать пароль
+против этого хэша и падает с ValueError вместо возврата 401.
+Обнаружено тестом test_login_nonexistent_email.
+
+**Как исправила:**
+_DUMMY_HASH: str = hash_password("dummy_for_timing_attack_prevention")
 
 ---
 

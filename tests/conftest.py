@@ -1,7 +1,7 @@
 # tests/conftest.py
 
 import asyncio
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 
 import pytest
 import pytest_asyncio
@@ -17,21 +17,6 @@ from app.auth.security import create_access_token, hash_password
 from app.database import Base, get_db
 from app.main import create_application
 from app.models.user import User
-
-
-# ============================================================================
-# Event Loop
-# ============================================================================
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    """
-    Создаёт event loop для всей тестовой сессии.
-    """
-
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 # ============================================================================
