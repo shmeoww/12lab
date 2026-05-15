@@ -316,7 +316,7 @@ AI ревью Pull Request. При создании PR скрипт должен
 - Убрала зависимость openai, оставила только requests
 **Время:** ~240 мин
 ---
-## Задание 4: Генерация unit-тестов с высоким покрытием
+## Задание 7: Генерация unit-тестов с высоким покрытием
 ### Промпт 1
 **Инструмент:** Claude
 **Промпт:** "Ты — senior Python разработчик. Создай conftest.py для тестирования FastAPI приложения платформы онлайн-обучения.
@@ -389,3 +389,49 @@ REFRESH:
 
 Требования: assert на статус коды и ключевые поля ответа, комментарии к каждому тесту, type hints."
 **Результат:** Получила test_auth.py с 12 тестами — регистрация, логин, refresh.
+### Промпт 3
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай pytest тесты для CRUD эндпоинтов курсов платформы онлайн-обучения.
+Контекст проекта:
+- Фикстуры из conftest.py: client, admin_user, student_user,
+  admin_token, student_token, db_session
+- Эндпоинты:
+  GET  /api/v1/courses/         — список курсов (без авторизации)
+  GET  /api/v1/courses/{id}     — детали курса (без авторизации)
+  POST /api/v1/courses/         — создать курс (только AdminUser)
+  PUT  /api/v1/courses/{id}     — обновить курс (только AdminUser)
+  DELETE /api/v1/courses/{id}   — удалить курс (только AdminUser), 204
+
+CourseCreate: title (min 3 символа), description (опционально),
+is_published (bool, default False)
+
+Создай tests/test_courses.py со следующими тестами:
+
+ПОЛУЧЕНИЕ КУРСОВ:
+- test_get_courses_empty — пустой список если курсов нет
+- test_get_courses_returns_only_published — GET /courses/ возвращает
+  только опубликованные курсы
+- test_get_course_by_id — получить существующий курс
+- test_get_course_not_found — несуществующий id → 404
+
+СОЗДАНИЕ:
+- test_create_course_as_admin — успешное создание админом → 201
+- test_create_course_as_student — студент не может создавать → 403
+- test_create_course_unauthorized — без токена → 401
+- test_create_course_short_title — title меньше 3 символов → 422
+
+ОБНОВЛЕНИЕ:
+- test_update_course_as_admin — успешное обновление → 200
+- test_update_course_not_found — несуществующий id → 404
+- test_update_course_as_student — студент не может обновлять → 403
+
+УДАЛЕНИЕ:
+- test_delete_course_as_admin — успешное удаление → 204
+- test_delete_course_as_student — студент не может удалять → 403
+- test_delete_course_not_found — несуществующий id → 404
+Требования: async/await, фикстура course для создания тестового курса, type hints, комментарии."
+**Результат:** Получила test_courses.py с 14 тестами — получение, создание, обновление, удаление курсов + проверка прав доступа.
+### Промпт 4
+**Инструмент:** Claude
+**Промпт:** ""
+**Результат:**
