@@ -475,3 +475,49 @@ is_published (bool, default False)
 Требования: async/await, type hints, комментарии."
 **Результат:** Получила test_enrollments.py с 14 тестами — запись на курс,
 прогресс, отписка, сертификаты.
+### Промпт 5
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай pytest тесты для эндпоинтов уроков, тестирования и аналитики платформы онлайн-обучения.
+Контекст:
+- Фикстуры из conftest.py: client, admin_user, student_user,
+  admin_token, student_token, db_session
+- Модели: Course, Lesson, Enrollment, Test
+
+Фикстуры которые нужно создать внутри файла:
+- published_course — Course(title, description, is_published=True, owner_id=admin_user.id)
+- lesson — Lesson(title, content, order=1, course_id=published_course.id)
+- enrollment — Enrollment(user_id=student_user.id, course_id=published_course.id,
+  progress=0.0, is_completed=False)
+
+Создай tests/test_lessons_analytics.py:
+
+ТЕСТЫ LESSONS (prefix: /api/v1/courses/{course_id}/lessons):
+- test_get_lessons_empty — пустой список уроков курса (ActiveUser)
+- test_create_lesson_as_admin — создать урок → 201 (AdminUser)
+- test_create_lesson_as_student — студент не может создавать → 403
+- test_create_lesson_duplicate_order — два урока с одинаковым order → 409
+- test_get_lesson_by_id — получить урок по id (ActiveUser)
+- test_get_lesson_wrong_course — урок из другого курса → 404
+- test_update_lesson_as_admin — обновить урок → 200 (AdminUser)
+- test_delete_lesson_as_admin — удалить урок → 204 (AdminUser)
+
+ТЕСТЫ TESTS/QUIZ (prefix: /api/v1/courses/{course_id}/tests):
+- test_submit_test_success — сдать тест со score=80 → 201, passed=True
+- test_submit_test_fail — сдать тест со score=40 → 201, passed=False
+- test_submit_test_not_enrolled — без записи на курс → 403
+- test_submit_test_unauthorized — без токена → 401
+- test_get_my_test_results — получить свои результаты → список
+- test_get_my_test_results_empty — пустой список
+
+ТЕСТЫ ANALYTICS (prefix: /api/v1/analytics):
+- test_get_platform_stats_as_admin — получить статистику → 200 (AdminUser)
+- test_get_platform_stats_as_student — студент не может → 403
+- test_get_top_courses_as_admin — топ курсов → 200 (AdminUser)
+- test_get_my_stats — личная статистика студента → 200 (ActiveUser)
+- test_get_my_stats_with_data — статистика после записи на курс
+Требования: async/await, type hints, комментарии."
+**Результат:** Получила test_lessons_analytics.py с 19 тестами.
+### Промпт 6
+**Инструмент:** Claude
+**Промпт:** ""
+**Результат:** 
