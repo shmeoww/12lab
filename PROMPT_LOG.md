@@ -316,3 +316,48 @@ AI ревью Pull Request. При создании PR скрипт должен
 - Убрала зависимость openai, оставила только requests
 **Время:** ~240 мин
 ---
+## Задание 4: Генерация unit-тестов с высоким покрытием
+### Промпт 1
+**Инструмент:** Claude
+**Промпт:** "Ты — senior Python разработчик. Создай conftest.py для тестирования
+FastAPI приложения платформы онлайн-обучения.
+
+Контекст проекта:
+- Асинхронный SQLAlchemy (AsyncSession) с aiosqlite
+- Base и engine в app/database.py
+- create_application() в app/main.py возвращает FastAPI app
+- get_db() dependency в app/database.py
+- Модели: User, Course, Lesson, Enrollment, Test, Certificate
+- JWT аутентификация через app/auth/security.py:
+  hash_password(), create_access_token()
+
+Нужно создать tests/conftest.py со следующими фикстурами:
+
+1. event_loop — переопределить scope на "session"
+
+2. engine (scope="session") — асинхронный движок
+   с in-memory SQLite: "sqlite+aiosqlite:///:memory:"
+   
+3. tables (scope="session") — создать все таблицы через
+   Base.metadata.create_all, удалить после тестов
+
+4. db_session (scope="function") — AsyncSession для каждого теста,
+   откатывает транзакцию после каждого теста (не сохраняет данные)
+
+5. client (scope="function") — AsyncClient из httpx с
+   переопределённым get_db dependency через override
+
+6. admin_user (scope="function") — создать User с is_admin=True,
+   email="admin@test.com", password="Admin123"
+
+7. student_user (scope="function") — создать User с is_admin=False,
+   email="student@test.com", password="Student123"
+
+8. admin_token (scope="function") — JWT токен для admin_user
+
+9. student_token (scope="function") — JWT токен для student_user
+
+Требования: pytest-asyncio, asyncio_mode="auto" в pytest.ini или
+pyproject.toml, все фикстуры async, type hints."
+**Результат:** Получила conftest.py с фикстурами: engine, tables, db_session,
+client, admin_user, student_user, admin_token, student_token.
