@@ -303,3 +303,16 @@ JWT токен хранить в localStorage под ключом "access_token"
 11. Исправила логин во фронтенде: form-urlencoded → JSON"
 - Время: ~360 мин
 ---
+## Задание 4: CI/CD с AI ревью
+### Промпт 1 — GitHub Actions workflow
+**Инструмент:** Claude
+**Промпт:** "Создай GitHub Actions workflow и Python скрипт для автоматического
+AI ревью Pull Request. При создании PR скрипт должен получать diff изменений,
+отправлять в AI API и публиковать комментарий в PR."
+**Результат:** Получила ai-review.yml и ai_review.py с OpenAI интеграцией.
+**Исправила вручную:**
+- Заменила OpenAI на Hugging Face API (Mistral-7B-Instruct) — OpenAI платный
+- Обновила секрет с OPENAI_API_KEY на HF_API_KEY
+- Убрала зависимость openai, оставила только requests
+**Время:** ~240 мин
+---
