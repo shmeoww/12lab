@@ -22,10 +22,10 @@ from app.models.mixins import CreatedAtMixin
 
 if TYPE_CHECKING:
     # Импорты только для type-checker'а — избегаем циклических импортов
-    from app.models.certificate import Certificate
-    from app.models.course import Course
-    from app.models.enrollment import Enrollment
-    from app.models.test import Test
+    from app.models.certificate import Certificate # pragma: no cover
+    from app.models.course import Course # pragma: no cover
+    from app.models.enrollment import Enrollment # pragma: no cover
+    from app.models.test import Test # pragma: no cover
 
 
 class User(CreatedAtMixin, Base):

@@ -21,7 +21,7 @@ from app.database import Base
 from app.models.mixins import CreatedAtMixin
 
 if TYPE_CHECKING:
-    from app.models.course import Course
+    from app.models.course import Course # pragma: no cover
 
 
 class Lesson(CreatedAtMixin, Base):

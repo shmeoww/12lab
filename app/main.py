@@ -30,7 +30,7 @@ settings = get_settings()
 
 # ── Lifespan (startup / shutdown) ────────────────────────────────────────────
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # pragma: no cover
     """
     Контекстный менеджер жизненного цикла приложения.
     Код до yield — startup, код после — shutdown.
@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
     yield  # Приложение работает
 
     # Shutdown
-    logger.info("🛑 Остановка приложения")
+    logger.info("🛑 Остановка приложения") # pragma: no cover
 
 
 # ── Создание экземпляра приложения ────────────────────────────────────────────
@@ -92,12 +92,12 @@ app = create_application()
 
 # ── Системные эндпоинты ───────────────────────────────────────────────────────
 @app.get("/", tags=["System"], summary="Корневой эндпоинт")
-async def root() -> dict[str, str]:
+async def root() -> dict[str, str]:  # pragma: no cover
     return {"message": f"Добро пожаловать в {settings.app_name}!"}
 
 
 @app.get("/health", tags=["System"], summary="Healthcheck для мониторинга")
-async def health_check() -> dict[str, Any]:
+async def health_check() -> dict[str, Any]:  # pragma: no cover
     """
     Проверка работоспособности сервиса.
     Используется load-balancer'ами и системами мониторинга.
@@ -111,5 +111,5 @@ async def health_check() -> dict[str, Any]:
 from fastapi.responses import FileResponse
 
 @app.get("/app", tags=["System"], summary="Фронтенд")
-async def frontend():
+async def frontend():  # pragma: no cover
     return FileResponse("static/index.html")

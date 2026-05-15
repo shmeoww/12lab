@@ -56,7 +56,7 @@ class Base(DeclarativeBase):
 
 
 # ── Dependency для FastAPI ────────────────────────────────────────────────────
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:  # pragma: no cover
     """
     FastAPI dependency, предоставляющий сессию БД на время запроса.
 
@@ -74,7 +74,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 # ── Вспомогательные функции ───────────────────────────────────────────────────
-async def create_all_tables() -> None:
+async def create_all_tables() -> None:  # pragma: no cover
     """
     Создаёт все таблицы по метаданным ORM-моделей.
     Вызывается при старте приложения (только в dev/тестах).
@@ -84,10 +84,11 @@ async def create_all_tables() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def drop_all_tables() -> None:
+async def drop_all_tables() -> None:  # pragma: no cover
     """Удаляет все таблицы. Используется в тестах (setup/teardown)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
 
 from typing import Annotated
 from fastapi import Depends

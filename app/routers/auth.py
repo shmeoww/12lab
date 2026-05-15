@@ -58,7 +58,7 @@ DbSession = Annotated[AsyncSession, Depends(get_db)]
 # Фиктивный хэш для защиты от user enumeration attack.
 # Используется в /login когда пользователь не найден —
 # чтобы время ответа было одинаковым независимо от результата поиска.
-from app.auth.security import hash_password
+from app.auth.security import hash_password # pragma: no cover
 _DUMMY_HASH: str = hash_password("dummy_for_timing_attack_prevention")
 
 

@@ -22,11 +22,11 @@ from app.database import Base
 from app.models.mixins import TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models.certificate import Certificate
-    from app.models.enrollment import Enrollment
-    from app.models.lesson import Lesson
-    from app.models.test import Test
-    from app.models.user import User
+    from app.models.certificate import Certificate # pragma: no cover
+    from app.models.enrollment import Enrollment # pragma: no cover
+    from app.models.lesson import Lesson # pragma: no cover
+    from app.models.test import Test # pragma: no cover
+    from app.models.user import User # pragma: no cover
 
 
 class Course(TimestampMixin, Base):

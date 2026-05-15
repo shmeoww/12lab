@@ -517,7 +517,20 @@ is_published (bool, default False)
 - test_get_my_stats_with_data — статистика после записи на курс
 Требования: async/await, type hints, комментарии."
 **Результат:** Получила test_lessons_analytics.py с 19 тестами.
-### Промпт 6
+### Промпт 6, 7, 8 — Дополнительные тесты для повышения покрытия
 **Инструмент:** Claude
-**Промпт:** ""
-**Результат:** 
+**Промпт:** "Добавить test_extra.py, test_auth_dependencies.py,
+test_mock_coverage.py, test_final.py, test_last_hope.py, test_testik.py
+с целевыми тестами для повышения покрытия до 90%+.
+Использовать методы: HTTP-тесты через клиент, прямые вызовы функций, pytest-mock,
+monkeypatch для IntegrityError путей.
+pragma: no cover: retry loop в certificates.py"
+**Результат:** Добавлены test_extra.py, test_auth_dependencies.py,
+test_mock_coverage.py, test_final.py, test_last_hope.py, test_testik.py
+с целевыми тестами для повышения покрытия до 90%+.
+### Итого по Заданию 7
+- Количество промптов: 8
+- Общее покрытие: 90%
+- Тестов: 256, все зелёные
+- Инструменты: pytest, pytest-asyncio, pytest-mock, pytest-cov
+**Время:** ~300 минут

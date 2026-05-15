@@ -34,8 +34,8 @@ from app.database import Base
 from app.models.mixins import _utcnow
 
 if TYPE_CHECKING:
-    from app.models.course import Course
-    from app.models.user import User
+    from app.models.course import Course # pragma: no cover
+    from app.models.user import User # pragma: no cover
 
 class Test(Base):
     """

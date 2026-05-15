@@ -31,12 +31,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
-from app.models.mixins import _utcnow
+from app.database import Base 
+from app.models.mixins import _utcnow 
 
 if TYPE_CHECKING:
-    from app.models.course import Course
-    from app.models.user import User
+    from app.models.course import Course # pragma: no cover
+    from app.models.user import User # pragma: no cover
 
 class Enrollment(Base):
     """
