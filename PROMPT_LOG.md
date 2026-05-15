@@ -433,5 +433,45 @@ is_published (bool, default False)
 **Результат:** Получила test_courses.py с 14 тестами — получение, создание, обновление, удаление курсов + проверка прав доступа.
 ### Промпт 4
 **Инструмент:** Claude
-**Промпт:** ""
-**Результат:**
+**Промпт:** "Ты — senior Python разработчик. Создай pytest тесты для эндпоинтов записи на курсы и сертификатов платформы онлайн-обучения.
+Контекст проекта:
+- Фикстуры из conftest.py: client, admin_user, student_user,
+  admin_token, student_token, db_session
+- Модели: Course, Enrollment, Certificate, Test
+- Эндпоинты Enrollments:
+  POST /api/v1/enrollments/{course_id} — записаться (ActiveUser)
+  GET  /api/v1/enrollments/my          — мои записи (ActiveUser)
+  GET  /api/v1/enrollments/{course_id}/progress — прогресс (ActiveUser)
+  DELETE /api/v1/enrollments/{course_id} — отписаться (ActiveUser)
+- Эндпоинты Certificates:
+  POST /api/v1/certificates/{course_id} — получить сертификат (ActiveUser)
+  GET  /api/v1/certificates/my          — мои сертификаты (ActiveUser)
+
+Создай tests/test_enrollments.py:
+Фикстура published_course — опубликованный курс с owner_id=admin_user.id
+Фикстура unpublished_course — неопубликованный курс с owner_id=admin_user.id
+Фикстура enrollment — запись student_user на published_course
+  (создать напрямую через db_session: Enrollment(user_id, course_id,
+  progress=0.0, is_completed=False))
+Фикстура completed_enrollment — запись с progress=100.0, is_completed=True
+
+ТЕСТЫ ENROLLMENTS:
+- test_enroll_success — студент записывается на курс → 201
+- test_enroll_duplicate — повторная запись → 409
+- test_enroll_unpublished_course — запись на неопубликованный → 400
+- test_enroll_unauthorized — без токена → 401
+- test_get_my_enrollments — получить свои записи → список
+- test_get_my_enrollments_empty — пустой список если не записан
+- test_get_progress — получить прогресс по курсу
+- test_unenroll_success — отписаться → 204
+- test_unenroll_not_enrolled — отписаться если не записан → 404
+
+ТЕСТЫ CERTIFICATES:
+- test_get_certificate_not_completed — курс не завершён → 400
+- test_get_certificate_success — курс завершён → 201
+- test_get_certificate_duplicate — повторный запрос → 409
+- test_get_my_certificates_empty — пустой список
+- test_get_my_certificates — список с сертификатом
+Требования: async/await, type hints, комментарии."
+**Результат:** Получила test_enrollments.py с 14 тестами — запись на курс,
+прогресс, отписка, сертификаты.
